@@ -1,4 +1,14 @@
-/* main.js – handles prediction form, visualization tabs, model metrics */
+/* main.js – handles prediction form */
+
+// ── Algorithm selector ────────────────────────────────────────────────
+let selectedAlgo = "Linear Regression";
+document.querySelectorAll(".algo-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".algo-btn").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    selectedAlgo = btn.dataset.algo;
+  });
+});
 
 // ── Prediction form ──────────────────────────────────────────────────────────
 document.getElementById("predict-form").addEventListener("submit", async (e) => {
@@ -6,10 +16,10 @@ document.getElementById("predict-form").addEventListener("submit", async (e) => 
 
   const resultBox = document.getElementById("result-box");
   const errorBox  = document.getElementById("error-box");
-  resultBox.classList.add("hidden");
   errorBox.classList.add("hidden");
 
   const payload = {
+    algorithm:        selectedAlgo,
     study_hours:      parseFloat(document.getElementById("study_hours").value),
     attendance:       parseFloat(document.getElementById("attendance").value),
     prev_grade:       parseFloat(document.getElementById("prev_grade").value),
@@ -41,6 +51,7 @@ document.getElementById("predict-form").addEventListener("submit", async (e) => 
     document.getElementById("result-grade").textContent = "Grade: " + grade;
     document.getElementById("result-bar").style.width   = score + "%";
     document.getElementById("result-msg").textContent   = getMessage(score);
+    document.getElementById("result-algo").textContent  = "Model: " + selectedAlgo;
 
     // Grade colour
     const gradeEl = document.getElementById("result-grade");
@@ -48,8 +59,8 @@ document.getElementById("predict-form").addEventListener("submit", async (e) => 
       score >= 80 ? "#22c55e" :
       score >= 60 ? "#f59e0b" : "#ef4444";
 
-    resultBox.classList.remove("hidden");
-    resultBox.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    document.querySelector(".result-placeholder").classList.add("hidden");
+    document.querySelector(".result-content").classList.remove("hidden");
 
   } catch (err) {
     errorBox.textContent = "⚠️ " + err.message;

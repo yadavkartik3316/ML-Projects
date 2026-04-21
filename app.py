@@ -29,9 +29,10 @@ try:
     scaler   = artifacts["scaler"]
     FEATURES = artifacts["features"]
     RESULTS  = artifacts["results"]
+    MODELS   = artifacts.get("models", {"Linear Regression": model, "Decision Tree": model, "Random Forest": model})
     print("Model loaded successfully.")
 except FileNotFoundError:
-    model = scaler = FEATURES = RESULTS = None
+    model = scaler = FEATURES = RESULTS = MODELS = None
     print("WARNING: model.pkl not found. Run train_model.py first.")
 
 # ── Routes ──────────────────────────────────────────────────────────────────
@@ -62,16 +63,17 @@ def predict():
         return jsonify({"error": "Model not loaded. Run train_model.py first."}), 503
 
     data = request.get_json(force=True)
+    algo = data.get("algorithm", "Linear Regression")
+    selected_model = MODELS.get(algo, model)
 
-    # Validate & extract features in correct order
     try:
         row = [float(data[f]) for f in FEATURES]
     except KeyError as e:
         return jsonify({"error": f"Missing field: {e}"}), 400
 
     row_scaled = scaler.transform([row])
-    score = float(round(model.predict(row_scaled)[0], 2))
-    score = max(0.0, min(100.0, score))   # clamp to [0, 100]
+    score = float(round(selected_model.predict(row_scaled)[0], 2))
+    score = max(0.0, min(100.0, score))
 
     grade = (
         "A+" if score >= 90 else

@@ -100,14 +100,29 @@ input:focus, select:focus {
 .btn-predict:hover  { background: var(--primary-d); }
 .btn-predict:active { transform: scale(.98); }
 
+/* ── Two-column predict layout ────────────────────────────── */
+.predict-layout {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 2rem;
+  align-items: start;
+}
+.predict-right { position: sticky; top: 80px; }
+
 /* ── Result box ────────────────────────────────────────────── */
 .result-box {
-  margin-top: 2rem; text-align: center;
-  padding: 1.8rem; border-radius: var(--radius);
+  text-align: center;
+  padding: 2rem 1.5rem;
+  border-radius: var(--radius);
   background: linear-gradient(135deg, #eef4ff 0%, #f0fff4 100%);
   border: 1.5px solid var(--border);
-  animation: fadeIn .4s ease;
+  min-height: 280px;
+  display: flex; align-items: center; justify-content: center;
 }
+.result-placeholder { color: var(--muted); }
+.result-placeholder span { font-size: 3rem; display: block; margin-bottom: .5rem; }
+.result-placeholder p { font-size: .92rem; }
+.result-content { width: 100%; animation: fadeIn .4s ease; }
 .result-score {
   font-size: 3.5rem; font-weight: 800; color: var(--primary-d);
   line-height: 1;
@@ -119,14 +134,15 @@ input:focus, select:focus {
 .result-bar-wrap {
   background: var(--border); border-radius: 99px;
   height: 12px; overflow: hidden; margin: .5rem auto 1rem;
-  max-width: 400px;
+  max-width: 260px;
 }
 .result-bar {
   height: 100%; border-radius: 99px;
   background: linear-gradient(90deg, var(--primary), var(--success));
   transition: width .8s ease;
 }
-.result-msg { color: var(--muted); font-size: .95rem; }
+.result-msg { color: var(--muted); font-size: .9rem; }
+.result-algo { color: var(--muted); font-size: .8rem; margin-top: .4rem; font-style: italic; }
 
 /* ── Error box ─────────────────────────────────────────────── */
 .error-box {
@@ -136,6 +152,23 @@ input:focus, select:focus {
 }
 
 .hidden { display: none !important; }
+
+/* ── Algorithm selector ─────────────────────────────────────────────────── */
+.algo-selector {
+  display: flex; flex-wrap: wrap; gap: .6rem; margin-bottom: 1.6rem;
+}
+.algo-btn {
+  padding: .5rem 1.2rem;
+  border: 2px solid var(--border);
+  border-radius: 99px; background: #f0f4ff;
+  font-size: .92rem; font-weight: 600; cursor: pointer;
+  color: var(--text); transition: all .2s;
+}
+.algo-btn:hover  { border-color: var(--primary); color: var(--primary); }
+.algo-btn.active {
+  background: var(--primary); color: #fff; border-color: var(--primary);
+  box-shadow: 0 2px 10px rgba(79,142,247,.3);
+}
 
 /* ── Visualization tabs ────────────────────────────────────── */
 .tab-bar {
@@ -191,6 +224,10 @@ footer {
 }
 
 /* ── Responsive ────────────────────────────────────────────── */
+@media (max-width: 860px) {
+  .predict-layout { grid-template-columns: 1fr; }
+  .predict-right { position: static; }
+}
 @media (max-width: 600px) {
   .hero h1 { font-size: 1.5rem; }
   .result-score { font-size: 2.5rem; }

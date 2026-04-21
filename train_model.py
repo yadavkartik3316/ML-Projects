@@ -212,6 +212,7 @@ artifacts = {
     "scaler":   scaler,
     "features": FEATURES,
     "results":  results.to_dict(orient="records"),
+    "models":   {"Linear Regression": lr, "Decision Tree": dt, "Random Forest": rf},
 }
 with open("models/model.pkl", "wb") as f:
     pickle.dump(artifacts, f)
