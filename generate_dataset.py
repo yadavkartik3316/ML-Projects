@@ -4,8 +4,12 @@ generate_dataset.py
 Generates a realistic synthetic student performance dataset and saves it to data/students.csv
 """
 
+import os
 import numpy as np
 import pandas as pd
+
+os.makedirs("data", exist_ok=True)
+os.makedirs("models", exist_ok=True)
 
 np.random.seed(42)
 N = 1000
