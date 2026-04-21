@@ -1,0 +1,7 @@
+venv/
+__pycache__/
+*.pyc
+models/model.pkl
+data/students.csv
+static/img/
+app_log.txt
