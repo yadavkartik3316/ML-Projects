@@ -31,6 +31,8 @@ from sklearn.metrics         import r2_score, mean_absolute_error, mean_squared_
 
 warnings.filterwarnings("ignore")
 os.makedirs("static/img", exist_ok=True)
+os.makedirs("models", exist_ok=True)
+os.makedirs("data", exist_ok=True)
 
 # ─────────────────────────────────────────────
 # 1. LOAD DATA
