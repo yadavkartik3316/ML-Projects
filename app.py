@@ -10,30 +10,47 @@ Endpoints:
   GET  /images/<name> → serves saved visualization images
 """
 
-import pickle, os
+import pickle
+import os
 import numpy as np
 from flask import Flask, request, jsonify, render_template, send_from_directory
 
 app = Flask(__name__)
 
 # ── Load trained artifacts ──────────────────────────────────────────────────
-MODEL_PATH = os.path.join("models", "model.pkl")
+
+# Get absolute path of current file (VERY IMPORTANT)
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+# model.pkl is in SAME folder as app.py
+MODEL_PATH = os.path.join(BASE_DIR, "model.pkl")
+
 
 def load_artifacts():
     with open(MODEL_PATH, "rb") as f:
         return pickle.load(f)
 
+
 try:
     artifacts = load_artifacts()
-    model    = artifacts["model"]
-    scaler   = artifacts["scaler"]
+    model = artifacts["model"]
+    scaler = artifacts["scaler"]
     FEATURES = artifacts["features"]
-    RESULTS  = artifacts["results"]
-    MODELS   = artifacts.get("models", {"Linear Regression": model, "Decision Tree": model, "Random Forest": model})
-    print("Model loaded successfully.")
+    RESULTS = artifacts["results"]
+    MODELS = artifacts.get(
+        "models",
+        {
+            "Linear Regression": model,
+            "Decision Tree": model,
+            "Random Forest": model,
+        },
+    )
+    print("✅ Model loaded successfully from:", MODEL_PATH)
+
 except FileNotFoundError:
     model = scaler = FEATURES = RESULTS = MODELS = None
-    print("WARNING: model.pkl not found. Run train_model.py first.")
+    print("❌ ERROR: model.pkl not found at:", MODEL_PATH)
+
 
 # ── Routes ──────────────────────────────────────────────────────────────────
 
@@ -54,11 +71,11 @@ def predict():
       "health": 4,
       "extra_activities": 1,
       "internet_access": 1,
-      "parental_edu": 2,       # 0=none,1=hs,2=bachelor,3=master
-      "family_support": 2      # 0=low,1=medium,2=high
+      "parental_edu": 2,
+      "family_support": 2
     }
-    Returns: { "predicted_score": 78.45, "grade": "B" }
     """
+
     if model is None:
         return jsonify({"error": "Model not loaded. Run train_model.py first."}), 503
 
@@ -71,10 +88,14 @@ def predict():
     except KeyError as e:
         return jsonify({"error": f"Missing field: {e}"}), 400
 
+    # Scale input
     row_scaled = scaler.transform([row])
+
+    # Predict
     score = float(round(selected_model.predict(row_scaled)[0], 2))
     score = max(0.0, min(100.0, score))
 
+    # Grade logic
     grade = (
         "A+" if score >= 90 else
         "A"  if score >= 80 else
@@ -83,12 +104,14 @@ def predict():
         "D"  if score >= 50 else "F"
     )
 
-    return jsonify({"predicted_score": score, "grade": grade})
+    return jsonify({
+        "predicted_score": score,
+        "grade": grade
+    })
 
 
 @app.route("/results", methods=["GET"])
 def results():
-    """Returns model comparison metrics as JSON."""
     if RESULTS is None:
         return jsonify({"error": "Model not loaded."}), 503
     return jsonify(RESULTS)
@@ -96,9 +119,10 @@ def results():
 
 @app.route("/images/<filename>")
 def images(filename):
-    """Serve visualization images."""
-    return send_from_directory(os.path.join("static", "img"), filename)
+    return send_from_directory(os.path.join(BASE_DIR, "static", "img"), filename)
 
+
+# ── Run App ─────────────────────────────────────────────────────────────────
 
 if __name__ == "__main__":
     app.run(debug=True, port=5000)
